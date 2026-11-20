@@ -34,3 +34,10 @@ capacitydesk:
     ttl: 15m
   cors:
     allowed-origins: http://localhost:5173
+  assistant:
+    llm:                       # optional; off by default. The local deterministic assistant is always available.
+      enabled: false
+      api-key: ${GEMINI_API_KEY:}
+      model: gemini-2.0-flash
+      timeout: 4s
+      retries: 1

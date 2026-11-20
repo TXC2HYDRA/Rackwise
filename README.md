@@ -50,6 +50,11 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - `POST /plans/{id}/apply` (REVIEWER/ADMIN): locks the plan and its rack groups in id order, requires each rack group `version` to equal the plan snapshot, re-checks slots and power, creates servers, bumps versions. A changed rack group makes the plan `STALE`; the request returns to `PLANNED` for a new plan.
 - One decision per plan (unique constraint) and unique server hostnames back the application-level duplicate guards.
 
+## Planning assistant (advisory only)
+`GET /api/v1/plans/{id}/advice` returns an explanation, risks and what-if suggestions for a plan. It is read-only: nothing in the approval or execution path reads it, and it uses the plan's own visibility rules.
+- **Local (always on):** deterministic rules over the plan numbers (`LocalPlanningAssistant`).
+- **Optional LLM narrative (off by default):** set `capacitydesk.assistant.llm.enabled=true` and `GEMINI_API_KEY`. The model only rewrites the explanation text. Only plan figures and rack group codes are sent (no free text, names or credentials). Output is used only if it is short plain text with no links/markup and every number appears in the plan; otherwise, on timeout (4s), error, or after one bounded retry, the local text is returned with a `fallbackReason`.
+
 ## Frontend (implemented)
 React + TypeScript + Vite, Tailwind, TanStack Query, Recharts. Screens: login, dashboard, inventory, new request, my requests, request detail, plan detail (approve / reject / apply), approval queue, approval history, audit trail, manage inventory (admin). Light and dark mode.
 The access token is kept in memory only (never in browser storage), so a page reload requires signing in again; the session ends automatically when the token expires.
