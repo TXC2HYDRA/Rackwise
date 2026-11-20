@@ -1,10 +1,14 @@
 package com.capacitydesk.identity.application;
 
+import com.capacitydesk.audit.application.AuditService;
+import com.capacitydesk.audit.domain.AuditAction;
+import com.capacitydesk.audit.domain.TargetType;
 import com.capacitydesk.common.web.DomainException;
 import com.capacitydesk.identity.domain.Role;
 import com.capacitydesk.identity.domain.User;
 import com.capacitydesk.identity.persistence.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,12 +21,14 @@ public class UserService {
 
     private final UserRepository users;
     private final PasswordEncoder encoder;
+    private final AuditService audit;
     /** Compared against when the username is unknown, so response time does not reveal valid usernames. */
     private final String dummyHash;
 
-    public UserService(UserRepository users, PasswordEncoder encoder) {
+    public UserService(UserRepository users, PasswordEncoder encoder, AuditService audit) {
         this.users = users;
         this.encoder = encoder;
+        this.audit = audit;
         this.dummyHash = encoder.encode("not-a-real-password");
     }
 
@@ -52,7 +58,10 @@ public class UserService {
         if (actorId.equals(targetId) && !roles.contains(Role.ADMIN)) {
             throw DomainException.conflict("SELF_DEMOTION", "Administrators cannot remove their own ADMIN role");
         }
+        Object before = Map.of("roles", target.getRoles().stream().map(Role::name).sorted().toList());
         target.replaceRoles(roles);
+        audit.success(AuditAction.USER_ROLES_CHANGED, TargetType.USER, targetId, before,
+                Map.of("roles", roles.stream().map(Role::name).sorted().toList()));
         return users.save(target);
     }
 

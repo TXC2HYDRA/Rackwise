@@ -32,7 +32,13 @@ Data centers, rack groups (slot + power limits, `version` bumped on every capaci
 A server occupies capacity unless `DECOMMISSIONED`. Capacity is derived from server rows, never stored.
 Dev profile seeds DC-A (rack groups X, Y, Z) and DC-B.
 
+## Audit trail (implemented)
+`audit_events` rows are written in the same transaction as the change they describe (failed logins use their own transaction).
+A DB trigger rejects UPDATE/DELETE/TRUNCATE (application-level append-only; a DB superuser can still drop the trigger, so this is not tamper-proof).
+`GET /api/v1/audit-events` (ADMIN: everything, REVIEWER: request/plan events only). Every response carries `X-Correlation-Id`.
+
 ## Verified so far
+- Audit rows for login success/failure and inventory writes, role filtering, and the append-only trigger checked manually.
 - Inventory reads, admin writes, 403/409/422 rules and pagination limits checked with curl (automated tests pending).
 - Login, `/auth/me`, 401/403/400 JSON error contract and admin-only `/api/v1/users` checked manually with curl (automated tests pending on `test/*` branch).
 - Backend compiles and starts against Postgres; `/actuator/health` reports UP.
