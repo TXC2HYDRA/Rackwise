@@ -99,7 +99,7 @@ class SecurityConfig {
                         .requestMatchers("/actuator/prometheus").hasAnyRole("ADMIN", "METRICS")
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // Role gates at the URL level too, so unauthorised callers get 403 before body validation runs.
-                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/users/**", "/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/audit-events/**").hasAnyRole("ADMIN", "REVIEWER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/inventory/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/inventory/**").hasRole("ADMIN")

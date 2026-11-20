@@ -20,6 +20,9 @@ public interface ServerRepository extends JpaRepository<Server, UUID>, JpaSpecif
 
     boolean existsByHostname(String hostname);
 
+    @EntityGraph(attributePaths = "rackGroup")
+    Optional<Server> findByHostname(String hostname);
+
     @Query(USAGE + "group by s.rackGroup.id")
     List<UsageRow> usageByRackGroup();
 

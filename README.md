@@ -50,6 +50,9 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - `POST /plans/{id}/apply` (REVIEWER/ADMIN): locks the plan and its rack groups in id order, requires each rack group `version` to equal the plan snapshot, re-checks slots and power, creates servers, bumps versions. A changed rack group makes the plan `STALE`; the request returns to `PLANNED` for a new plan.
 - One decision per plan (unique constraint) and unique server hostnames back the application-level duplicate guards.
 
+## External inventory sync (mock)
+`POST /api/v1/admin/inventory-sync` (ADMIN) pulls from an `ExternalInventorySource`; only a synthetic mock CMDB exists (5 servers in DC-A/Y plus one record for an unknown rack group). New servers are created and statuses aligned, never deleted. Everything goes through `InventoryService`, so capacity limits, duplicate hostnames, locking, version bumps (which stale open plans) and audit all apply; records that do not fit are skipped and reported. `GET .../runs` lists history. Verified against the running app: first run created 5 and skipped 1, second run changed nothing, reviewer got 403.
+
 ## Planning assistant (advisory only)
 `GET /api/v1/plans/{id}/advice` returns an explanation, risks and what-if suggestions for a plan. It is read-only: nothing in the approval or execution path reads it, and it uses the plan's own visibility rules.
 - **Local (always on):** deterministic rules over the plan numbers (`LocalPlanningAssistant`).
