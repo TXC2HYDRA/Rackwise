@@ -5,6 +5,6 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     authorization:
       type: Bearer
-      credentials_file: /etc/prometheus/scrape-token   # mounted from METRICS_SCRAPE_TOKEN, see docker-compose.yml
+      credentials_file: /tmp/scrape-token   # written from METRICS_SCRAPE_TOKEN by the prometheus service command in docker-compose.yml
     static_configs:
       - targets: ['backend:8080']

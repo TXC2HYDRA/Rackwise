@@ -58,6 +58,16 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - **Local (always on):** deterministic rules over the plan numbers (`LocalPlanningAssistant`).
 - **Optional LLM narrative (off by default):** set `capacitydesk.assistant.llm.enabled=true` and `GEMINI_API_KEY`. The model only rewrites the explanation text. Only plan figures and rack group codes are sent (no free text, names or credentials). Output is used only if it is short plain text with no links/markup and every number appears in the plan; otherwise, on timeout (4s), error, or after one bounded retry, the local text is returned with a `fallbackReason`.
 
+## Run everything with Docker
+```
+cp .env.example .env   # fill POSTGRES_PASSWORD, JWT_SECRET (openssl rand -base64 48), METRICS_SCRAPE_TOKEN (openssl rand -hex 24), GRAFANA_ADMIN_PASSWORD
+scripts/dev-start.sh   # builds and starts Postgres, backend, frontend (nginx), Prometheus, Grafana
+scripts/seed-demo.sh http://localhost:8080   # optional demo requests/plans
+scripts/dev-stop.sh    # add --wipe to delete the database volume
+```
+The stack uses the `dev,prod` profiles: synthetic inventory, dev users and JSON logs. It is a demo stack, not a production configuration. nginx serves the SPA with a CSP and proxies `/api` to the backend.
+Verified on this machine: all five services healthy; Prometheus target `rackwise-backend` UP using the scrape token; Grafana loaded the provisioned dashboard and queries Prometheus (returned live `rackwise_capacity_slots_used`); the 8 Playwright e2e tests (incl. axe) pass against the containerised app (`E2E_BASE_URL=http://localhost:3000 npx playwright test` in `frontend/`). Running the stack found a real bug (nginx dropped the port from `Host`, so Spring rejected browser logins with a CORS 403); fixed.
+
 ## Monitoring
 - `/actuator/prometheus` needs an ADMIN JWT, or a static bearer token (`METRICS_SCRAPE_TOKEN`) that grants role METRICS and works only on that path (verified against the running app: no auth 401, wrong token 401, scrape token 200 on `/actuator/prometheus` and 401 on `/api/**` and other actuator endpoints).
 - Custom metrics: `rackwise_audit_events_total{action,result}` (plan generated/approved/rejected/applied/failed/stale, denied attempts; counted when recorded), capacity gauges `rackwise_capacity_{slots,power}_{used,limit}`, `assistant_advice_total{source}`, `assistant_fallback_total{reason}`, plus standard JVM and HTTP histograms.
