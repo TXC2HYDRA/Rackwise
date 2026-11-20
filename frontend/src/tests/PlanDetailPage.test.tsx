@@ -12,9 +12,10 @@ const plan = (over: Partial<Plan> = {}): Plan => ({
   evaluation: [{ rackGroupId: 'rg', rackGroupCode: 'X', freeSlots: 55, freeWatts: 27500, maxBySlots: 55, maxByPower: 55, fit: 55, allocated: 40, binding: 'SLOTS' }],
   contentHash: 'a'.repeat(64), createdBy: 'requester-1', createdAt: '2026-01-01T10:00:00Z', appliedAt: null, failureReason: null, ...over,
 })
+const quietAdvice = { source: 'LOCAL', narrative: 'Advice text.', risks: [], suggestions: [], fallbackReason: null, disclaimer: 'Advisory only.' }
 const request = { id: 'r1', requesterId: 'requester-1', requesterName: 'alice', serverCount: 40 }
 const render = (p: Plan, user = makeUser(['REVIEWER'], 'reviewer-1'), extra = {}) =>
-  renderApp(<PlanDetailPage />, { user, route: '/plans/p1', path: '/plans/:id', routes: { 'GET /plans/p1': ok(p), 'GET /capacity-requests/r1': ok(request), ...extra } })
+  renderApp(<PlanDetailPage />, { user, route: '/plans/p1', path: '/plans/:id', routes: { 'GET /plans/p1': ok(p), 'GET /capacity-requests/r1': ok(request), 'GET /plans/p1/advice': ok(quietAdvice), ...extra } })
 
 describe('PlanDetailPage', () => {
   it('lets a different reviewer approve a feasible proposed plan, binding the content hash', async () => {
