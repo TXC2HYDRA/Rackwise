@@ -27,6 +27,8 @@ test('infrastructure expansion: request, plan, review, apply, verify, audit', as
   await expect(page.getByRole('heading', { name: 'Plan #1' })).toBeVisible()
   await expect(page.getByText('Placed all 40 servers')).toBeVisible()
   await expect(page.getByText('✓ Feasible')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Planning assistant (advisory)' })).toBeVisible()
+  await expect(page.getByText('All 40 requested servers fit')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Approve plan' })).toHaveCount(0) // requesters cannot decide
   await expect(page.getByRole('link', { name: 'Approval queue' })).toHaveCount(0) // requesters do not even see the nav item
   // client-side navigation (a full reload would drop the in-memory token and redirect to login)
@@ -39,6 +41,14 @@ test('infrastructure expansion: request, plan, review, apply, verify, audit', as
   await signIn(page, 'bob')
   await page.getByRole('link', { name: 'Approval queue' }).click()
   const row = page.getByRole('row').filter({ hasText: shortId })
+  // the queue is oldest first and paged; a long-lived dev database may hold other pending plans
+  await expect(page.getByRole('table', { name: 'Plans awaiting review' })).toBeVisible()
+  for (let i = 0; i < 20 && (await row.count()) === 0; i++) {
+    const next = page.getByRole('button', { name: 'Next' })
+    if (!(await next.isEnabled())) break
+    await next.click()
+    await page.waitForLoadState('networkidle')
+  }
   await expect(row).toBeVisible()
   await row.getByRole('link', { name: /Review/ }).click()
   await page.getByLabel('Comment').fill('Capacity confirmed')
@@ -99,4 +109,13 @@ test('a reviewer cannot decide a plan for their own request', async ({ page, req
   await page.getByRole('button', { name: 'Generate plan' }).click()
   await expect(page.getByRole('heading', { name: 'Plan #1' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Approve plan' })).toHaveCount(0)
+})
+
+test('admin runs the simulated inventory sync and sees the run', async ({ page }) => {
+  await signIn(page, 'admin')
+  await page.getByRole('link', { name: 'Manage inventory' }).click()
+  await expect(page.getByRole('heading', { name: 'Manage inventory' })).toBeVisible()
+  await page.getByRole('button', { name: 'Run sync now' }).click()
+  await expect(page.getByText(/Sync finished/)).toBeVisible()
+  await expect(page.getByRole('table', { name: 'Recent sync runs' }).getByText('✓ Succeeded').first()).toBeVisible()
 })
