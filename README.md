@@ -61,6 +61,7 @@ The access token is kept in memory only (never in browser storage), so a page re
 Dev: `cd frontend && npm run dev` (proxies `/api` to `localhost:8080`).
 
 ## Verified so far
+- Backend: 105 tests pass (unit + Testcontainers integration), including 36 for the planning assistant (rules, validator, fake-server Gemini adapter, 20-case evaluation, endpoint security).
 - Frontend: type-check, lint and production build pass; 40 Vitest component/unit tests pass (`scripts/test-frontend.sh`).
 - Browser e2e (Playwright + real backend + PostgreSQL, `scripts/test-e2e.sh`): 8 tests pass, covering the full request → plan → review → apply → audit workflow, login failure, route guard, form validation, self-approval prevention, and axe checks (WCAG 2 A/AA, serious/critical) on login, dashboard, inventory, queue, audit and the request form in light and dark mode. The first run found and fixed a dark-mode contrast failure.
 - End-to-end workflow checked manually: unapproved/rejected/re-applied plans return 409, self-approval 403, wrong hash 409, two competing plans applied concurrently gave exactly one APPLIED and one STALE with capacity not exceeded (automated tests pending).
