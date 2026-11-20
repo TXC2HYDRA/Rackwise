@@ -10,7 +10,7 @@ All numbers below come from runs on 2026-11-20 on the development machine, and f
 | Backend integration | Spring Boot + Testcontainers (PostgreSQL 16, real HTTP) | 59 tests; all pass |
 | Assistant evaluation | JUnit harness | 20 / 20 cases (see AGENT_EVALUATION.md) |
 | Frontend unit/component | Vitest + Testing Library | 47 tests; all pass |
-| Browser end to end | Playwright (Chromium) + axe-core | 9 tests; all pass locally against Vite. The first 8 also pass against the Docker stack and in CI; the 9th (admin sync) was run against Vite only |
+| Browser end to end | Playwright (Chromium) + axe-core | 9 tests; all pass locally against Vite. All 9 also pass against the Docker stack in CI (PR #24) |
 | Static | `tsc -b`, oxlint, production build | pass (2 Fast Refresh lint warnings, 0 errors) |
 | Smoke | `scripts/smoke-test.sh` on the Docker stack | passed |
 
