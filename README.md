@@ -58,6 +58,9 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - **Local (always on):** deterministic rules over the plan numbers (`LocalPlanningAssistant`).
 - **Optional LLM narrative (off by default):** set `capacitydesk.assistant.llm.enabled=true` and `GEMINI_API_KEY`. The model only rewrites the explanation text. Only plan figures and rack group codes are sent (no free text, names or credentials). Output is used only if it is short plain text with no links/markup and every number appears in the plan; otherwise, on timeout (4s), error, or after one bounded retry, the local text is returned with a `fallbackReason`.
 
+## CI
+`.github/workflows/ci.yml` runs on every PR and push to `main`: backend tests (Testcontainers), frontend lint + type-check + Vitest + build, then an end-to-end job that starts the Docker stack and runs Playwright with axe and checks the Prometheus target is up. Reports are uploaded as artifacts.
+
 ## Run everything with Docker
 ```
 cp .env.example .env   # fill POSTGRES_PASSWORD, JWT_SECRET (openssl rand -base64 48), METRICS_SCRAPE_TOKEN (openssl rand -hex 24), GRAFANA_ADMIN_PASSWORD
