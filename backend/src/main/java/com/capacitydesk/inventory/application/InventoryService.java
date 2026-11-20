@@ -1,5 +1,8 @@
 package com.capacitydesk.inventory.application;
 
+import com.capacitydesk.audit.application.AuditService;
+import com.capacitydesk.audit.domain.AuditAction;
+import com.capacitydesk.audit.domain.TargetType;
 import com.capacitydesk.common.web.DomainException;
 import com.capacitydesk.inventory.application.InventoryViews.CapacitySummary;
 import com.capacitydesk.inventory.application.InventoryViews.DataCenterView;
@@ -33,8 +36,10 @@ public class InventoryService {
     private final DataCenterRepository dataCenters;
     private final RackGroupRepository rackGroups;
     private final ServerRepository servers;
+    private final AuditService audit;
 
-    public InventoryService(DataCenterRepository dataCenters, RackGroupRepository rackGroups, ServerRepository servers) {
+    public InventoryService(DataCenterRepository dataCenters, RackGroupRepository rackGroups, ServerRepository servers, AuditService audit) {
+        this.audit = audit;
         this.dataCenters = dataCenters;
         this.rackGroups = rackGroups;
         this.servers = servers;
@@ -100,6 +105,7 @@ public class InventoryService {
             throw DomainException.conflict("DUPLICATE_CODE", "Data center code already exists");
         }
         DataCenter d = dataCenters.save(new DataCenter(code, name));
+        audit.success(AuditAction.DATA_CENTER_CREATED, TargetType.DATA_CENTER, d.getId(), null, Map.of("code", code, "name", name));
         return new DataCenterView(d.getId(), d.getCode(), d.getName());
     }
 
@@ -110,7 +116,10 @@ public class InventoryService {
         if (rackGroups.existsByDataCenterIdAndCode(dataCenterId, code)) {
             throw DomainException.conflict("DUPLICATE_CODE", "Rack group code already exists in this data center");
         }
-        return toCapacity(rackGroups.save(new RackGroup(dc, code, name, slots, powerWatts)), null);
+        RackGroup saved = rackGroups.save(new RackGroup(dc, code, name, slots, powerWatts));
+        audit.success(AuditAction.RACK_GROUP_CREATED, TargetType.RACK_GROUP, saved.getId(), null,
+                Map.of("dataCenter", dc.getCode(), "code", code, "slots", slots, "powerWatts", powerWatts));
+        return toCapacity(saved, null);
     }
 
     @Transactional
@@ -120,7 +129,10 @@ public class InventoryService {
         if ((usage != null && (usage.servers() > slots || usage.powerWatts() > powerWatts))) {
             throw DomainException.unprocessable("LIMIT_BELOW_USAGE", "New limits are below current usage");
         }
+        Object before = Map.of("slots", r.getSlotCapacity(), "powerWatts", r.getPowerCapacityWatts());
         r.changeLimits(slots, powerWatts);
+        audit.success(AuditAction.RACK_GROUP_LIMITS_CHANGED, TargetType.RACK_GROUP, rackGroupId, before,
+                Map.of("slots", slots, "powerWatts", powerWatts));
         return toCapacity(r, usage);
     }
 
@@ -131,7 +143,10 @@ public class InventoryService {
             throw DomainException.conflict("DUPLICATE_HOSTNAME", "Hostname already exists");
         }
         requireRoomFor(r, n.powerWatts());
-        return toView(servers.save(new Server(n.hostname(), r, n.cpuCores(), n.ramGb(), n.storageTb(), n.powerWatts(), ServerStatus.ACTIVE)));
+        Server saved = servers.save(new Server(n.hostname(), r, n.cpuCores(), n.ramGb(), n.storageTb(), n.powerWatts(), ServerStatus.ACTIVE));
+        audit.success(AuditAction.SERVER_ADDED, TargetType.SERVER, saved.getId(), null,
+                Map.of("hostname", n.hostname(), "rackGroupId", r.getId().toString(), "powerWatts", n.powerWatts()));
+        return toView(saved);
     }
 
     @Transactional
@@ -141,7 +156,9 @@ public class InventoryService {
         if (!s.getStatus().occupiesCapacity() && status.occupiesCapacity()) {
             requireRoomFor(r, s.getPowerWatts());
         }
+        ServerStatus old = s.getStatus();
         s.setStatus(status);
+        audit.success(AuditAction.SERVER_STATUS_CHANGED, TargetType.SERVER, serverId, Map.of("status", old), Map.of("status", status));
         return toView(s);
     }
 
