@@ -16,7 +16,7 @@ final class NarrativeValidator {
 
     static final int MAX_CHARS = 600;
     private static final Pattern NUMBER = Pattern.compile("\\d+");
-    private static final Pattern FORBIDDEN = Pattern.compile("(?i)https?:|www\\.|[<>`\\[\\]{}]|[\\p{Cntrl}&&[^\\n]]|ignore (all|previous)|approve this|you should approve");
+    private static final Pattern FORBIDDEN = Pattern.compile("(?i)https?:|www\\.|[<>`*#|~\\[\\]{}]|[\\p{Cntrl}&&[^\\n]]|ignore (all|previous)|approve this|you should approve");
 
     private NarrativeValidator() {
     }
