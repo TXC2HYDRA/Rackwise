@@ -1,3 +1,3 @@
-# Dev profile: run with -Dspring.profiles.active=dev
+# Dev profile: -Dspring.profiles.active=dev  (seeds demo users; NEVER use in production)
 capacitydesk:
-  bootstrap-dev-users: true
+  dev-password: ${DEV_USER_PASSWORD:Rackwise-Dev-1!}
