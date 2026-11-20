@@ -21,6 +21,12 @@ cd frontend && npm install && npm run dev
 
 IntelliJ: open `backend/pom.xml` as a project, set Project SDK to JDK 21, add the `.env` values as run-configuration environment variables.
 
+## Auth (implemented)
+Stateless JWT (HS256, 15 min, in-memory on the client; no refresh token yet). Roles: `REQUESTER`, `REVIEWER`, `ADMIN`.
+Dev accounts (profile `dev` only, password `Rackwise-Dev-1!` or `DEV_USER_PASSWORD`): `alice` requester, `bob` and `carol` reviewers, `admin`.
+Run with `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`.
+
 ## Verified so far
+- Login, `/auth/me`, 401/403/400 JSON error contract and admin-only `/api/v1/users` checked manually with curl (automated tests pending on `test/*` branch).
 - Backend compiles and starts against Postgres; `/actuator/health` reports UP.
 - Frontend production build succeeds.
