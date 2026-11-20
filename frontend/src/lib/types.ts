@@ -53,3 +53,26 @@ export interface AuditEvent {
   targetId: string; result: 'SUCCESS' | 'FAILURE' | 'DENIED'; correlationId: string | null
   before: string | null; after: string | null; detail: string | null
 }
+
+export interface Advice {
+  source: 'LOCAL' | 'LLM_NARRATIVE'
+  narrative: string
+  risks: string[]
+  suggestions: { type: string; text: string }[]
+  fallbackReason: string | null
+  disclaimer: string
+}
+
+export interface SyncRun {
+  id: string
+  source: string
+  status: 'RUNNING' | 'SUCCEEDED' | 'FAILED'
+  startedAt: string
+  finishedAt: string | null
+  created: number
+  updated: number
+  unchanged: number
+  skipped: number
+  skipDetails: string[]
+  error: string | null
+}
