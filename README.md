@@ -55,6 +55,12 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - **Local (always on):** deterministic rules over the plan numbers (`LocalPlanningAssistant`).
 - **Optional LLM narrative (off by default):** set `capacitydesk.assistant.llm.enabled=true` and `GEMINI_API_KEY`. The model only rewrites the explanation text. Only plan figures and rack group codes are sent (no free text, names or credentials). Output is used only if it is short plain text with no links/markup and every number appears in the plan; otherwise, on timeout (4s), error, or after one bounded retry, the local text is returned with a `fallbackReason`.
 
+## Monitoring
+- `/actuator/prometheus` needs an ADMIN JWT, or a static bearer token (`METRICS_SCRAPE_TOKEN`) that grants role METRICS and works only on that path (verified against the running app: no auth 401, wrong token 401, scrape token 200 on `/actuator/prometheus` and 401 on `/api/**` and other actuator endpoints).
+- Custom metrics: `rackwise_audit_events_total{action,result}` (plan generated/approved/rejected/applied/failed/stale, denied attempts; counted when recorded), capacity gauges `rackwise_capacity_{slots,power}_{used,limit}`, `assistant_advice_total{source}`, `assistant_fallback_total{reason}`, plus standard JVM and HTTP histograms.
+- `monitoring/` holds the Prometheus scrape config and a provisioned Grafana dashboard (JSON not yet loaded into a running Grafana).
+- `prod` profile switches console logs to structured JSON (verified); the correlation id is carried via MDC.
+
 ## Frontend (implemented)
 React + TypeScript + Vite, Tailwind, TanStack Query, Recharts. Screens: login, dashboard, inventory, new request, my requests, request detail, plan detail (approve / reject / apply), approval queue, approval history, audit trail, manage inventory (admin). Light and dark mode.
 The access token is kept in memory only (never in browser storage), so a page reload requires signing in again; the session ends automatically when the token expires.

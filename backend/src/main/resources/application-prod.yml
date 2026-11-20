@@ -1,0 +1,5 @@
+# Container/production profile: structured JSON logs (MDC correlationId is included in every line).
+logging:
+  structured:
+    format:
+      console: logstash

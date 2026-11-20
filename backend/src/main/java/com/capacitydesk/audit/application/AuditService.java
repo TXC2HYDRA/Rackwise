@@ -5,6 +5,7 @@ import com.capacitydesk.audit.domain.AuditEvent;
 import com.capacitydesk.audit.domain.AuditResult;
 import com.capacitydesk.audit.domain.TargetType;
 import com.capacitydesk.audit.persistence.AuditEventRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -24,9 +25,17 @@ public class AuditService {
     private final AuditEventRepository events;
     private final JsonMapper json;
 
-    public AuditService(AuditEventRepository events, JsonMapper json) {
+    private final MeterRegistry metrics;
+
+    public AuditService(AuditEventRepository events, JsonMapper json, MeterRegistry metrics) {
         this.events = events;
         this.json = json;
+        this.metrics = metrics;
+    }
+
+    /** One counter family covers plan generated/approved/rejected/applied/failed/stale and denied attempts. Counted when recorded. */
+    private void count(AuditAction action, AuditResult result) {
+        metrics.counter("rackwise.audit.events", "action", action.name(), "result", result.name()).increment();
     }
 
     /** Joins the caller's transaction, so the audit row commits or rolls back with the business change. */
@@ -39,6 +48,7 @@ public class AuditService {
     /** For events where the actor is not yet in the security context (successful login). */
     @Transactional
     public void recordAs(UUID actorId, String actorName, AuditAction action, TargetType type, String targetId) {
+        count(action, AuditResult.SUCCESS);
         events.save(new AuditEvent(actorId, actorName, action, type, targetId, AuditResult.SUCCESS,
                 MDC.get(CORRELATION_KEY), null, null, null));
     }
@@ -56,6 +66,7 @@ public class AuditService {
 
     private AuditEvent build(AuditAction action, TargetType type, String targetId, AuditResult result,
                              Object before, Object after, String detail) {
+        count(action, result);
         UUID actorId = null;
         String actorName = "system";
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
