@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: capacity-desk
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${POSTGRES_PORT:5440}/${POSTGRES_DB:capacitydesk}
+    username: ${POSTGRES_USER:capacitydesk}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    clean-disabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never

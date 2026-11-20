@@ -1,0 +1,16 @@
+# build
+target/
+node_modules/
+dist/
+# env / secrets
+.env
+*.pem
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+# tests output
+playwright-report/
+test-results/
+coverage/
