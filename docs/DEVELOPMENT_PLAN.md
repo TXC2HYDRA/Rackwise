@@ -35,4 +35,4 @@ Status as of 2026-11-20. "Done" means implemented and exercised by the tests lis
 - A production profile without dev users; multi-instance safe sync lock.
 
 ## Delivery history (PRs)
-Backend foundation and modules (#1–#8), frontend app (#9) and tests (#10), planning assistant (#11, fix #12, tests #13), observability (#14, tests #15), inventory sync (#16, tests #17), Docker stack (#18), CI (#19), documentation (#20 onward). Each feature on its own branch, merged by squash with a described PR; tests on `test/*`, documentation on `docs/*`, CI on `ci/*`.
+Backend bootstrap, modules and their tests (#1–#8), frontend app (#9) and tests (#10), planning assistant (#11, fix #12, tests #13), observability (#14, tests #15), inventory sync (#16, tests #17), Docker stack (#18), CI (#19), documentation (#20, #21, and this set). Each feature on its own branch, merged by squash with a described PR; tests on `test/*`, documentation on `docs/*`, CI on `ci/*`.

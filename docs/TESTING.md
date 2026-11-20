@@ -7,7 +7,7 @@ All numbers below come from runs on 2026-11-20 on the development machine, and f
 | Suite | Tool | Result |
 |---|---|---|
 | Backend unit | JUnit 5 | 27 tests (placement engine 11, state machines 11, user service 5) + 31 assistant unit tests; all pass |
-| Backend integration | Spring Boot + Testcontainers (PostgreSQL 16, real HTTP) | 58 tests; all pass |
+| Backend integration | Spring Boot + Testcontainers (PostgreSQL 16, real HTTP) | 59 tests; all pass |
 | Assistant evaluation | JUnit harness | 20 / 20 cases (see AGENT_EVALUATION.md) |
 | Frontend unit/component | Vitest + Testing Library | 40 tests; all pass |
 | Browser end to end | Playwright (Chromium) + axe-core | 8 tests; all pass, locally against Vite and against the Docker stack, and in CI |
