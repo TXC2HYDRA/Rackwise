@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { dateTime } from '../lib/format'
 import { Button, Card, ErrorState, Field, Loading, Notice, PageHeader, StatusBadge, Table, inputClass, td } from '../components/ui'
 import { ApiError, api } from '../lib/api'
 import { watts } from '../lib/format'
-import type { CapacitySummary, DataCenter, Page, ServerStatus, ServerView } from '../lib/types'
+import type { CapacitySummary, DataCenter, Page, ServerStatus, ServerView, SyncRun } from '../lib/types'
 
 type Msg = { kind: 'success' | 'error'; text: string }
 
@@ -35,6 +36,9 @@ export function AdminInventoryPage() {
   const [editId, setEditId] = useState<string | null>(null); const [limSlots, setLimSlots] = useState(''); const [limPower, setLimPower] = useState('')
   const limits = useAdminAction((id: string) => api(`/inventory/rack-groups/${id}/limits`, { method: 'PUT', body: { slotCapacity: Number(limSlots), powerCapacityWatts: Number(limPower) } }), 'Limits updated.', setMsg)
   const setStatus = useAdminAction(({ id, status }: { id: string; status: ServerStatus }) => api(`/inventory/servers/${id}/status`, { method: 'PUT', body: { status } }), 'Server status updated.', setMsg)
+
+  const runs = useQuery({ queryKey: ['sync-runs'], queryFn: () => api<SyncRun[]>('/admin/inventory-sync/runs') })
+  const sync = useAdminAction(() => api<SyncRun>('/admin/inventory-sync', { method: 'POST' }), 'Sync finished. See the run history below.', setMsg)
 
   const submit = (fn: () => void) => (e: FormEvent) => { e.preventDefault(); setMsg(null); fn() }
 
@@ -71,6 +75,24 @@ export function AdminInventoryPage() {
           </form>
         </Card>
       </div>
+
+      <Card title="External inventory sync (simulated source)" className="mt-6"
+        actions={<Button onClick={() => { setMsg(null); sync.mutate(undefined) }} loading={sync.isPending}>Run sync now</Button>}>
+        <p className="mb-3 text-sm text-slate-600 dark:text-slate-300">Pulls servers from the simulated external system. New servers are added and statuses aligned; nothing is deleted. Records that do not fit the capacity limits are skipped and listed.</p>
+        {runs.isLoading ? <Loading /> : runs.isError ? <ErrorState error={runs.error} /> : !runs.data?.length ? <p className="text-sm text-slate-500 dark:text-slate-400">No sync has run yet.</p> : (
+          <Table caption="Recent sync runs" headers={['Started', 'Result', 'Created', 'Updated', 'Unchanged', 'Skipped', 'Details']}>
+            {runs.data.slice(0, 5).map((r) => (
+              <tr key={r.id}>
+                <td className={td}>{dateTime(r.startedAt)}</td>
+                <td className={td}><StatusBadge status={r.status} /></td>
+                <td className={`${td} tabular-nums`}>{r.created}</td><td className={`${td} tabular-nums`}>{r.updated}</td>
+                <td className={`${td} tabular-nums`}>{r.unchanged}</td><td className={`${td} tabular-nums`}>{r.skipped}</td>
+                <td className={`${td} text-xs`}>{r.error ?? (r.skipDetails.length ? r.skipDetails.join('; ') : '—')}</td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </Card>
 
       <Card title="Rack group limits" className="mt-6">
         {capacity.isLoading ? <Loading /> : capacity.isError ? <ErrorState error={capacity.error} /> : (

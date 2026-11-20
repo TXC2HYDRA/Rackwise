@@ -78,7 +78,7 @@ Verified on this machine: all five services healthy; Prometheus target `rackwise
 - `prod` profile switches console logs to structured JSON (verified); the correlation id is carried via MDC.
 
 ## Frontend (implemented)
-React + TypeScript + Vite, Tailwind, TanStack Query, Recharts. Screens: login, dashboard, inventory, new request, my requests, request detail, plan detail (approve / reject / apply), approval queue, approval history, audit trail, manage inventory (admin). Light and dark mode.
+React + TypeScript + Vite, Tailwind, TanStack Query, Recharts. Screens: login, dashboard, inventory, new request, my requests, request detail, plan detail (approve / reject / apply, plus the advisory planning-assistant panel), approval queue, approval history, audit trail, manage inventory (admin; includes the simulated external inventory sync). Light and dark mode.
 The access token is kept in memory only (never in browser storage), so a page reload requires signing in again; the session ends automatically when the token expires.
 Dev: `cd frontend && npm run dev` (proxies `/api` to `localhost:8080`).
 

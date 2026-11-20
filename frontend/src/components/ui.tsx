@@ -102,7 +102,7 @@ const label: Record<string, [keyof typeof tones, string]> = {
   PROPOSED: ['blue', '◔ Proposed'], APPLIED: ['green', '✓ Applied'], FAILED: ['red', '✕ Failed'], STALE: ['amber', '⚠ Stale'],
   FEASIBLE: ['green', '✓ Feasible'], PARTIAL: ['amber', '⚠ Partial'], INFEASIBLE: ['red', '✕ Infeasible'],
   ACTIVE: ['green', '● Active'], MAINTENANCE: ['amber', '● Maintenance'], DECOMMISSIONED: ['slate', '○ Decommissioned'],
-  SUCCESS: ['green', '✓ Success'], FAILURE: ['red', '✕ Failure'], DENIED: ['amber', '⛔ Denied'],
+  SUCCEEDED: ['green', '✓ Succeeded'], RUNNING: ['blue', '◔ Running'], SUCCESS: ['green', '✓ Success'], FAILURE: ['red', '✕ Failure'], DENIED: ['amber', '⛔ Denied'],
 }
 
 /** Always shows a text label and glyph, so meaning never depends on colour alone. */

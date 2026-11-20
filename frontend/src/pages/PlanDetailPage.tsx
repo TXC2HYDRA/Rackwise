@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../app/auth'
+import { AdviceCard } from '../components/AdviceCard'
 import { Button, Card, ErrorState, Field, Loading, Notice, PageHeader, StatusBadge, Table, inputClass, td } from '../components/ui'
 import { ApiError, api } from '../lib/api'
 import { dateTime, watts } from '../lib/format'
@@ -90,6 +91,8 @@ export function PlanDetailPage() {
             ))}
           </Table>
         </Card>
+
+        <AdviceCard planId={p.id} />
 
         {own && p.status === 'PROPOSED' && has('REVIEWER') && <Notice kind="info">You cannot approve or reject a plan for your own request. Another reviewer must decide.</Notice>}
         {(canDecide || canApply) && (
