@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,9 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -76,7 +80,11 @@ class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter converter) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter converter,
+                                    @Value("${capacitydesk.metrics.scrape-token:}") String scrapeToken) throws Exception {
+        ScrapeTokenFilter scrape = new ScrapeTokenFilter(scrapeToken);
+        DefaultBearerTokenResolver defaultResolver = new DefaultBearerTokenResolver();
+        BearerTokenResolver resolver = req -> scrape.matches(req) ? null : defaultResolver.resolve(req); // scrape token is not a JWT
         AuthenticationEntryPoint entryPoint = (req, res, ex) ->
                 writeError(res, 401, "UNAUTHENTICATED", "Authentication required", req.getRequestURI());
         AccessDeniedHandler denied = (req, res, ex) ->
@@ -88,6 +96,7 @@ class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/prometheus").hasAnyRole("ADMIN", "METRICS")
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // Role gates at the URL level too, so unauthorised callers get 403 before body validation runs.
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
@@ -99,7 +108,9 @@ class SecurityConfig {
                         .requestMatchers("/api/v1/approvals/**").hasAnyRole("REVIEWER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/capacity-requests").hasAnyRole("REQUESTER", "ADMIN")
                         .anyRequest().authenticated())
+                .addFilterBefore(scrape, BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer(o -> o
+                        .bearerTokenResolver(resolver)
                         .jwt(j -> j.jwtAuthenticationConverter(converter))
                         .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(denied))
