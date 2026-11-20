@@ -22,6 +22,10 @@ public class DomainException extends RuntimeException {
         return new DomainException(HttpStatus.CONFLICT, code, message);
     }
 
+    public static DomainException forbidden(String code, String message) {
+        return new DomainException(HttpStatus.FORBIDDEN, code, message);
+    }
+
     public static DomainException unprocessable(String code, String message) {
         return new DomainException(HttpStatus.UNPROCESSABLE_ENTITY, code, message);
     }

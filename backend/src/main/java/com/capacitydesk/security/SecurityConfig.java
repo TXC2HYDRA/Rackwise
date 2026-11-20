@@ -94,6 +94,9 @@ class SecurityConfig {
                         .requestMatchers("/api/v1/audit-events/**").hasAnyRole("ADMIN", "REVIEWER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/inventory/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/inventory/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/plans/*/approve", "/api/v1/plans/*/reject").hasRole("REVIEWER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/plans/*/apply").hasAnyRole("REVIEWER", "ADMIN")
+                        .requestMatchers("/api/v1/approvals/**").hasAnyRole("REVIEWER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/capacity-requests").hasAnyRole("REQUESTER", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(o -> o

@@ -45,6 +45,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return body(HttpStatus.CONFLICT, "DATA_CONFLICT", "Request conflicts with existing data", req, List.of());
     }
 
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    ResponseEntity<Object> concurrent(org.springframework.dao.OptimisticLockingFailureException ex, WebRequest req) {
+        return body(HttpStatus.CONFLICT, "CONCURRENT_MODIFICATION", "Resource was modified concurrently; retry", req, List.of());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> unexpected(Exception ex, WebRequest req) {
         log.error("Unhandled exception", ex);

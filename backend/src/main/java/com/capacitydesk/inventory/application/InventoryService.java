@@ -31,6 +31,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InventoryService {
 
+    public record Profile(int cpuCores, int ramGb, int storageTb, int powerWatts) {}
+
+    /** Raised when allocation cannot proceed; {@code stale} distinguishes a changed inventory from a capacity shortfall. */
+    public static class AllocationBlockedException extends DomainException {
+        private final boolean stale;
+
+        public AllocationBlockedException(boolean stale, String message) {
+            super(org.springframework.http.HttpStatus.CONFLICT, stale ? "STALE_INVENTORY" : "NO_CAPACITY", message);
+            this.stale = stale;
+        }
+
+        public boolean isStale() {
+            return stale;
+        }
+    }
+
     public record NewServer(String hostname, UUID rackGroupId, int cpuCores, int ramGb, int storageTb, int powerWatts) {}
 
     private final DataCenterRepository dataCenters;
@@ -160,6 +176,31 @@ public class InventoryService {
         s.setStatus(status);
         audit.success(AuditAction.SERVER_STATUS_CHANGED, TargetType.SERVER, serverId, Map.of("status", old), Map.of("status", status));
         return toView(s);
+    }
+
+    /**
+     * Applies one plan allocation. Joins the caller's transaction. Locks the rack group row, requires its version to equal the
+     * plan's snapshot, re-checks slots and power, creates the servers and bumps the version.
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public int allocateForPlan(UUID rackGroupId, long expectedVersion, int count, Profile p, UUID planId) {
+        RackGroup r = rackGroups.findByIdForWrite(rackGroupId)
+                .orElseThrow(() -> new AllocationBlockedException(true, "Rack group no longer exists"));
+        if (r.getVersion() != expectedVersion) {
+            throw new AllocationBlockedException(true, "Rack group " + r.getCode() + " changed since the plan was computed");
+        }
+        UsageRow u = servers.usageOf(rackGroupId).orElse(new UsageRow(rackGroupId, 0, 0));
+        if (u.servers() + count > r.getSlotCapacity() || u.powerWatts() + (long) count * p.powerWatts() > r.getPowerCapacityWatts()) {
+            throw new AllocationBlockedException(false, "Rack group " + r.getCode() + " cannot fit the allocation");
+        }
+        String tag = planId.toString().substring(0, 8);
+        for (int i = 1; i <= count; i++) {
+            String host = "%s-%s-%s-%03d".formatted(r.getDataCenter().getCode().toLowerCase(), r.getCode().toLowerCase(), tag, i);
+            servers.save(new Server(host, r, p.cpuCores(), p.ramGb(), p.storageTb(), p.powerWatts(), ServerStatus.ACTIVE).fromPlan(planId));
+        }
+        servers.flush();
+        rackGroups.bumpVersion(rackGroupId);
+        return count;
     }
 
     private RackGroup lock(UUID rackGroupId) {

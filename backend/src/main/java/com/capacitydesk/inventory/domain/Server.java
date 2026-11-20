@@ -42,6 +42,9 @@ public class Server extends TimestampedEntity {
     @Column(nullable = false, length = 20)
     private ServerStatus status;
 
+    @Column(name = "plan_id", updatable = false)
+    private UUID planId;
+
     protected Server() {
     }
 
@@ -54,6 +57,11 @@ public class Server extends TimestampedEntity {
         this.storageTb = storageTb;
         this.powerWatts = powerWatts;
         this.status = status;
+    }
+
+    public Server fromPlan(UUID planId) {
+        this.planId = planId;
+        return this;
     }
 
     public void setStatus(ServerStatus status) {
