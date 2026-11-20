@@ -9,6 +9,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  jackson:
+    deserialization:
+      # missing primitives become 0/false and are rejected by Bean Validation with a field-level message
+      fail-on-null-for-primitives: false
   flyway:
     clean-disabled: true
   data:

@@ -48,6 +48,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Map<UUID, String> names(java.util.Collection<UUID> ids) {
+        return users.findAllById(ids).stream().collect(java.util.stream.Collectors.toMap(User::getId, User::getUsername));
+    }
+
+    @Transactional(readOnly = true)
     public List<User> list() {
         return users.findAll().stream().sorted((a, b) -> a.getUsername().compareTo(b.getUsername())).toList();
     }

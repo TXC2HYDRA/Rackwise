@@ -13,6 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -54,6 +56,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest req) {
         List<String> details = ex.getBindingResult().getFieldErrors().stream()
                 .map(f -> f.getField() + ": " + f.getDefaultMessage())
+                .sorted()
+                .toList();
+        return body(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", req, details);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest req) {
+        List<String> details = ex.getParameterValidationResults().stream()
+                .flatMap(r -> r.getResolvableErrors().stream().map(e -> {
+                    String name = e instanceof FieldError f ? f.getField() : String.valueOf(r.getMethodParameter().getParameterName());
+                    return name + ": " + e.getDefaultMessage();
+                }))
                 .sorted()
                 .toList();
         return body(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", req, details);
