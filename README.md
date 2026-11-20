@@ -43,7 +43,15 @@ A DB trigger rejects UPDATE/DELETE/TRUNCATE (application-level append-only; a DB
 Result is `FEASIBLE`, `PARTIAL` (never reported as success) or `INFEASIBLE`, with a per-rack-group evaluation. Plans store a SHA-256 content hash and the rack group versions they were computed against; a new plan marks earlier open plans `STALE`.
 Requesters only see their own requests (404 otherwise); reviewers and admins see all.
 
+## Approval and execution (implemented)
+Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | FAILED | STALE` (terminal otherwise).
+- `POST /plans/{id}/approve` (REVIEWER) must carry the plan's `contentHash`; only `FEASIBLE` plans are approvable. Requesters (and plan creators) cannot decide their own plans (403, audited as DENIED).
+- `POST /plans/{id}/reject` (REVIEWER, comment required). `GET /approvals/pending`, `GET /approvals/history`.
+- `POST /plans/{id}/apply` (REVIEWER/ADMIN): locks the plan and its rack groups in id order, requires each rack group `version` to equal the plan snapshot, re-checks slots and power, creates servers, bumps versions. A changed rack group makes the plan `STALE`; the request returns to `PLANNED` for a new plan.
+- One decision per plan (unique constraint) and unique server hostnames back the application-level duplicate guards.
+
 ## Verified so far
+- End-to-end workflow checked manually: unapproved/rejected/re-applied plans return 409, self-approval 403, wrong hash 409, two competing plans applied concurrently gave exactly one APPLIED and one STALE with capacity not exceeded (automated tests pending).
 - Request validation (400/422), idempotent replay, FEASIBLE/PARTIAL plans with spillover, visibility rules checked manually.
 - Audit rows for login success/failure and inventory writes, role filtering, and the append-only trigger checked manually.
 - Inventory reads, admin writes, 403/409/422 rules and pagination limits checked with curl (automated tests pending).
