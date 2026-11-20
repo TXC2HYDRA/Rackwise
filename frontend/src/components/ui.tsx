@@ -43,14 +43,14 @@ export function Spinner({ small }: { small?: boolean }) {
 }
 
 export function Loading({ label = 'Loading…' }: { label?: string }) {
-  return <div role="status" className="flex items-center gap-2 py-8 text-sm text-slate-500"><Spinner />{label}</div>
+  return <div role="status" className="flex items-center gap-2 py-8 text-sm text-slate-500 dark:text-slate-400"><Spinner />{label}</div>
 }
 
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="py-10 text-center">
       <p className="text-sm font-medium">{title}</p>
-      {hint && <p className="mt-1 text-sm text-slate-500">{hint}</p>}
+      {hint && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{hint}</p>}
     </div>
   )
 }
@@ -80,7 +80,7 @@ export function Field({ label, error, hint, htmlFor, children }: { label: string
     <div>
       <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium">{label}</label>
       {children}
-      {hint && !error && <p id={`${htmlFor}-hint`} className="mt-1 text-xs text-slate-500">{hint}</p>}
+      {hint && !error && <p id={`${htmlFor}-hint`} className="mt-1 text-xs text-slate-500 dark:text-slate-400">{hint}</p>}
       {error && <p id={`${htmlFor}-error`} role="alert" className="mt-1 text-xs font-medium text-red-700 dark:text-red-400">{error}</p>}
     </div>
   )
@@ -141,7 +141,7 @@ export function Table({ headers, children, caption }: { headers: string[]; child
       <table className="w-full text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
-          <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800">
+          <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 dark:border-slate-800">
             {headers.map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{h}</th>)}
           </tr>
         </thead>

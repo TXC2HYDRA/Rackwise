@@ -39,7 +39,7 @@ export function RequestDetailPage() {
               ['Storage', `${r.storageTb} TB`], ['Power each', `${r.powerWatts} W`],
               ['Other rack groups', r.allowOtherRackGroups ? 'Allowed' : 'Not allowed'],
             ] as [string, string | number][]).map(([k, v]) => (
-              <div key={k}><dt className="text-xs uppercase tracking-wide text-slate-500">{k}</dt><dd className="mt-0.5 font-medium">{v}</dd></div>
+              <div key={k}><dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{k}</dt><dd className="mt-0.5 font-medium">{v}</dd></div>
             ))}
           </dl>
           <p className="mt-4 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{r.justification}</p>

@@ -23,7 +23,7 @@ function Protected({ roles, children }: { roles?: Role[]; children: ReactNode })
     return (
       <div role="alert" className="mx-auto max-w-md py-20 text-center">
         <h1 className="text-xl font-semibold">Access denied</h1>
-        <p className="mt-2 text-sm text-slate-500">Your role does not include access to this page.</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Your role does not include access to this page.</p>
       </div>
     )
   }

@@ -10,9 +10,9 @@ import type { CapacityRequest, CapacitySummary, Page } from '../lib/types'
 function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-slate-500">{sub}</p>}
+      {sub && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{sub}</p>}
     </div>
   )
 }
@@ -54,14 +54,14 @@ export function DashboardPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <Card title="Slot utilisation by rack group">
               {chart.length === 0 ? <EmptyState title="No rack groups yet" /> : (
-                <div className="h-64" role="img" aria-label={`Bar chart of used and available slots for ${chart.length} rack groups. A table with the same data follows.`}>
+                <div className="h-64 text-slate-600 dark:text-slate-300" role="img" aria-label={`Bar chart of used and available slots for ${chart.length} rack groups. A table with the same data follows.`}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chart}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.3} />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'currentColor' }} />
+                      <YAxis tick={{ fontSize: 12, fill: 'currentColor' }} allowDecimals={false} />
                       <Tooltip />
-                      <Legend />
+                      <Legend wrapperStyle={{ color: 'currentColor' }} />
                       <Bar dataKey="Used" stackId="s" fill="#2563eb" />
                       <Bar dataKey="Available" stackId="s" fill="#94a3b8" />
                     </BarChart>
@@ -75,7 +75,7 @@ export function DashboardPage() {
                   {recent.data.content.map((r) => (
                     <li key={r.id} className="flex items-center justify-between py-2.5 text-sm">
                       <Link className="font-medium text-blue-700 hover:underline dark:text-blue-300" to={`/requests/${r.id}`}>{r.serverCount} servers</Link>
-                      <span className="text-xs text-slate-500">{r.requesterName} · {dateTime(r.createdAt)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{r.requesterName} · {dateTime(r.createdAt)}</span>
                     </li>
                   ))}
                 </ul>

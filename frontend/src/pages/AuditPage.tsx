@@ -42,7 +42,7 @@ export function AuditPage() {
                   <td className={`${td} whitespace-nowrap`}>{dateTime(e.occurredAt)}</td>
                   <td className={td}>{e.actorName}</td>
                   <td className={`${td} font-mono text-xs`}>{e.action}</td>
-                  <td className={td}>{e.targetType}<span className="block font-mono text-xs text-slate-500">{e.targetId.slice(0, 13)}</span></td>
+                  <td className={td}>{e.targetType}<span className="block font-mono text-xs text-slate-500 dark:text-slate-400">{e.targetId.slice(0, 13)}</span></td>
                   <td className={td}><StatusBadge status={e.result} /></td>
                   <td className={td}>
                     <details>

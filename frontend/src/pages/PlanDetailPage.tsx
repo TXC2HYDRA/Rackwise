@@ -60,15 +60,15 @@ export function PlanDetailPage() {
         <Card title="Summary">
           <p className="text-sm">{p.summary}</p>
           <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-4">
-            <div><dt className="text-xs uppercase tracking-wide text-slate-500">Requested</dt><dd className="mt-0.5 font-medium tabular-nums">{p.requestedServers}</dd></div>
-            <div><dt className="text-xs uppercase tracking-wide text-slate-500">Placed</dt><dd className="mt-0.5 font-medium tabular-nums">{p.allocatedServers}</dd></div>
-            <div><dt className="text-xs uppercase tracking-wide text-slate-500">Request</dt><dd className="mt-0.5"><Link className="font-medium text-blue-700 hover:underline dark:text-blue-300" to={`/requests/${p.requestId}`}>{p.requestId.slice(0, 8)}</Link></dd></div>
-            <div><dt className="text-xs uppercase tracking-wide text-slate-500">Proposal hash</dt><dd className="mt-0.5 font-mono text-xs" title={p.contentHash}>{p.contentHash.slice(0, 12)}…</dd></div>
+            <div><dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Requested</dt><dd className="mt-0.5 font-medium tabular-nums">{p.requestedServers}</dd></div>
+            <div><dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Placed</dt><dd className="mt-0.5 font-medium tabular-nums">{p.allocatedServers}</dd></div>
+            <div><dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Request</dt><dd className="mt-0.5"><Link className="font-medium text-blue-700 hover:underline dark:text-blue-300" to={`/requests/${p.requestId}`}>{p.requestId.slice(0, 8)}</Link></dd></div>
+            <div><dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Proposal hash</dt><dd className="mt-0.5 font-mono text-xs" title={p.contentHash}>{p.contentHash.slice(0, 12)}…</dd></div>
           </dl>
         </Card>
 
         <Card title="Proposed allocations">
-          {p.allocations.length === 0 ? <p className="text-sm text-slate-500">No servers could be placed.</p> : (
+          {p.allocations.length === 0 ? <p className="text-sm text-slate-500 dark:text-slate-400">No servers could be placed.</p> : (
             <Table caption="Proposed allocations" headers={['Rack group', 'Servers', 'Inventory version']}>
               {p.allocations.map((a) => (
                 <tr key={a.rackGroupId}><th scope="row" className={td}>{a.dataCenterCode} / {a.rackGroupCode}</th><td className={`${td} tabular-nums`}>{a.serverCount}</td><td className={`${td} tabular-nums`}>v{a.rackGroupVersion}</td></tr>

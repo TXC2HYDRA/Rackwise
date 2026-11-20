@@ -39,7 +39,7 @@ export function LoginPage() {
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-center text-2xl font-semibold tracking-tight">Rackwise</h1>
-        <p className="mt-1 text-center text-sm text-slate-500">Infrastructure capacity planning and approval</p>
+        <p className="mt-1 text-center text-sm text-slate-500 dark:text-slate-400">Infrastructure capacity planning and approval</p>
         <form onSubmit={submit} noValidate className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {sessionExpired && <Notice kind="info">Your session ended. Please sign in again.</Notice>}
           {formError && <Notice kind="error">{formError}</Notice>}
@@ -53,7 +53,7 @@ export function LoginPage() {
           </Field>
           <Button type="submit" loading={busy} className="w-full">Sign in</Button>
         </form>
-        <p className="mt-4 text-center text-xs text-slate-500">Simulated infrastructure. Independent portfolio project.</p>
+        <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">Simulated infrastructure. Independent portfolio project.</p>
       </div>
     </main>
   )
