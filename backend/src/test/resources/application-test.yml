@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    password: test   # real connection details come from the Testcontainers @ServiceConnection
+capacitydesk:
+  jwt:
+    secret: test-only-secret-that-is-at-least-32-bytes-long
+    issuer: rackwise
+    ttl: 15m
+management:
+  defaults:
+    metrics:
+      export:
+        enabled: true   # Spring Boot disables metric exporters in tests by default
+  prometheus:
+    metrics:
+      export:
+        enabled: true
