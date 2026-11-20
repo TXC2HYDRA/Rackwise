@@ -35,12 +35,12 @@ export function InventoryPage() {
           <Table caption="Capacity by rack group" headers={['Rack group', 'Slots free', 'Slot use', 'Power free', 'Power use', 'Version']}>
             {capacity.data.rackGroups.map((r) => (
               <tr key={r.id}>
-                <th scope="row" className={`${td} font-medium`}>{r.dataCenterCode} / {r.code}<span className="block text-xs font-normal text-slate-500">{r.name}</span></th>
+                <th scope="row" className={`${td} font-medium`}>{r.dataCenterCode} / {r.code}<span className="block text-xs font-normal text-slate-500 dark:text-slate-400">{r.name}</span></th>
                 <td className={`${td} tabular-nums`}>{r.slotsAvailable} of {r.slotCapacity}</td>
                 <td className={td}><Meter used={r.slotsUsed} total={r.slotCapacity} name={`${r.code} slot use`} /></td>
                 <td className={`${td} tabular-nums`}>{watts(r.powerAvailableWatts)} of {watts(r.powerCapacityWatts)}</td>
                 <td className={td}><Meter used={r.powerUsedWatts} total={r.powerCapacityWatts} name={`${r.code} power use`} /></td>
-                <td className={`${td} tabular-nums text-slate-500`}>v{r.version}</td>
+                <td className={`${td} tabular-nums text-slate-500 dark:text-slate-400`}>v{r.version}</td>
               </tr>
             ))}
           </Table>

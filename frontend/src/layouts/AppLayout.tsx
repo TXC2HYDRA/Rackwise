@@ -56,7 +56,7 @@ export function AppLayout() {
         <div className="space-y-3 border-t border-slate-200 p-4 text-sm dark:border-slate-800">
           <div>
             <p className="font-medium">{user?.displayName}</p>
-            <p className="text-xs text-slate-500">{user?.roles.join(', ')}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{user?.roles.join(', ')}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={toggle} aria-pressed={dark}>{dark ? 'Light mode' : 'Dark mode'}</Button>
