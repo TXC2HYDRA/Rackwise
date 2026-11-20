@@ -50,7 +50,13 @@ Plan states: `PROPOSED -> APPROVED | REJECTED | STALE`, `APPROVED -> APPLIED | F
 - `POST /plans/{id}/apply` (REVIEWER/ADMIN): locks the plan and its rack groups in id order, requires each rack group `version` to equal the plan snapshot, re-checks slots and power, creates servers, bumps versions. A changed rack group makes the plan `STALE`; the request returns to `PLANNED` for a new plan.
 - One decision per plan (unique constraint) and unique server hostnames back the application-level duplicate guards.
 
+## Frontend (implemented)
+React + TypeScript + Vite, Tailwind, TanStack Query, Recharts. Screens: login, dashboard, inventory, new request, my requests, request detail, plan detail (approve / reject / apply), approval queue, approval history, audit trail, manage inventory (admin). Light and dark mode.
+The access token is kept in memory only (never in browser storage), so a page reload requires signing in again; the session ends automatically when the token expires.
+Dev: `cd frontend && npm run dev` (proxies `/api` to `localhost:8080`).
+
 ## Verified so far
+- Frontend type-checks and builds for production (no browser-level verification yet).
 - End-to-end workflow checked manually: unapproved/rejected/re-applied plans return 409, self-approval 403, wrong hash 409, two competing plans applied concurrently gave exactly one APPLIED and one STALE with capacity not exceeded (automated tests pending).
 - Request validation (400/422), idempotent replay, FEASIBLE/PARTIAL plans with spillover, visibility rules checked manually.
 - Audit rows for login success/failure and inventory writes, role filtering, and the append-only trigger checked manually.
