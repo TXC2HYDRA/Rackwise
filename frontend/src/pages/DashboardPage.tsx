@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAuth } from '../app/auth'
-import { Card, EmptyState, ErrorState, Loading, Meter, PageHeader, Table, td } from '../components/ui'
+import { Button, Card, EmptyState, ErrorState, Loading, Meter, PageHeader, Table, td } from '../components/ui'
 import { api, qs } from '../lib/api'
 import { dateTime, pct, watts } from '../lib/format'
 import type { CapacityRequest, CapacitySummary, Page } from '../lib/types'
 
-function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+const accents = {
+  neutral: 'border-t-slate-300 dark:border-t-slate-700',
+  blue: 'border-t-blue-500', green: 'border-t-emerald-500', amber: 'border-t-amber-500', red: 'border-t-red-500',
+}
+
+function Stat({ label, value, sub, accent = 'neutral' }: { label: string; value: string | number; sub?: string; accent?: keyof typeof accents }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className={`rounded-xl border border-t-4 border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${accents[accent]}`}>
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{sub}</p>}
@@ -32,42 +36,40 @@ export function DashboardPage() {
   const recent = useQuery({ queryKey: ['recent-allocations'], queryFn: () => api<Page<CapacityRequest>>('/capacity-requests?status=FULFILLED&size=5') })
 
   const c = capacity.data
-  const chart = c?.rackGroups.map((r) => ({ name: `${r.dataCenterCode}/${r.code}`, Used: r.slotsUsed, Available: r.slotsAvailable })) ?? []
+  const busiest = [...(c?.rackGroups ?? [])].sort((a, b) => b.slotsUsed / b.slotCapacity - a.slotsUsed / a.slotCapacity).slice(0, 6)
 
   return (
     <>
-      <PageHeader title={`Welcome, ${user?.displayName.split(' ')[0]}`} subtitle="Capacity and approval overview" />
+      <PageHeader title={`Welcome, ${user?.displayName.split(' ')[0]}`} subtitle="Capacity and approval overview"
+        actions={has('REQUESTER', 'ADMIN') ? <Link to="/requests/new"><Button>Create a request</Button></Link> : reviewer ? <Link to="/approvals"><Button>Review pending plans</Button></Link> : undefined} />
       {capacity.isLoading ? <Loading /> : capacity.isError ? <ErrorState error={capacity.error} retry={() => capacity.refetch()} /> : c && (
         <>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Stat label="Available slots" value={c.availableSlots} sub={`of ${c.totalSlots} total`} />
-            <Stat label="Allocated slots" value={c.usedSlots} sub={`${pct(c.usedSlots, c.totalSlots)}% utilised`} />
-            <Stat label="Available power" value={watts(c.availablePowerWatts)} sub={`of ${watts(c.totalPowerWatts)}`} />
-            <Stat label={reviewer ? 'Awaiting review' : 'Plans awaiting review'} value={reviewer ? (pending.data?.totalElements ?? '…') : (planned.data?.totalElements ?? '…')} sub={reviewer ? 'proposed plans' : 'your planned requests'} />
+            <Stat accent="blue" label="Available slots" value={c.availableSlots} sub={`of ${c.totalSlots} total`} />
+            <Stat accent={pct(c.usedSlots, c.totalSlots) >= 90 ? 'red' : pct(c.usedSlots, c.totalSlots) >= 75 ? 'amber' : 'blue'} label="Allocated slots" value={c.usedSlots} sub={`${pct(c.usedSlots, c.totalSlots)}% utilised`} />
+            <Stat accent="blue" label="Available power" value={watts(c.availablePowerWatts)} sub={`of ${watts(c.totalPowerWatts)}`} />
+            <Stat accent="amber" label={reviewer ? 'Awaiting review' : 'Plans awaiting review'} value={reviewer ? (pending.data?.totalElements ?? '…') : (planned.data?.totalElements ?? '…')} sub={reviewer ? 'proposed plans' : 'your planned requests'} />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-4">
-            <Stat label="Approved" value={approved.data?.totalElements ?? '…'} sub="approved, not yet applied" />
-            <Stat label="Rejected" value={rejected.data?.totalElements ?? '…'} />
-            <Stat label="Planned" value={planned.data?.totalElements ?? '…'} />
+            <Stat accent="green" label="Approved" value={approved.data?.totalElements ?? '…'} sub="approved, not yet applied" />
+            <Stat accent="red" label="Rejected" value={rejected.data?.totalElements ?? '…'} />
+            <Stat accent="blue" label="Planned" value={planned.data?.totalElements ?? '…'} />
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <Card title="Slot utilisation by rack group">
-              {chart.length === 0 ? <EmptyState title="No rack groups yet" /> : (
-                <div className="h-64 text-slate-600 dark:text-slate-300" role="img" aria-label={`Bar chart of used and available slots for ${chart.length} rack groups. A table with the same data follows.`}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chart}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.3} />
-                      <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'currentColor' }} />
-                      <YAxis tick={{ fontSize: 12, fill: 'currentColor' }} allowDecimals={false} />
-                      <Tooltip />
-                      <Legend wrapperStyle={{ color: 'currentColor' }} />
-                      <Bar dataKey="Used" stackId="s" fill="#2563eb" />
-                      <Bar dataKey="Available" stackId="s" fill="#94a3b8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+            <Card title="Busiest rack groups">
+              {busiest.length === 0 ? <EmptyState title="No rack groups yet" /> : (
+                <ul className="space-y-3">
+                  {busiest.map((r) => (
+                    <li key={r.id} className="grid grid-cols-[7rem_1fr_auto] items-center gap-3 text-sm">
+                      <span className="truncate font-medium">{r.dataCenterCode} / {r.code}</span>
+                      <Meter used={r.slotsUsed} total={r.slotCapacity} name={`${r.code} busiest slot use`} />
+                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">{r.slotsAvailable} free</span>
+                    </li>
+                  ))}
+                </ul>
               )}
+              <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Top {busiest.length} of {c.rackGroups.length} by slot use. The full table is below.</p>
             </Card>
             <Card title="Recent allocations">
               {recent.isLoading ? <Loading /> : recent.isError ? <ErrorState error={recent.error} /> : recent.data?.content.length ? (

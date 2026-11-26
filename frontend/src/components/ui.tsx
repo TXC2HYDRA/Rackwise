@@ -116,8 +116,8 @@ export function Meter({ used, total, name }: { used: number; total: number; name
   const bar = p >= 90 ? 'bg-red-600' : p >= 75 ? 'bg-amber-500' : 'bg-blue-600'
   return (
     <div className="flex items-center gap-3">
-      <div role="progressbar" aria-label={name} aria-valuenow={p} aria-valuemin={0} aria-valuemax={100} className="h-2 w-28 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-        <div className={`h-full ${bar}`} style={{ width: `${p}%` }} />
+      <div role="progressbar" aria-label={name} aria-valuenow={p} aria-valuemin={0} aria-valuemax={100} className="h-2.5 w-full min-w-20 max-w-48 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+        <div className={`h-full rounded-full transition-all ${bar}`} style={{ width: `${p}%` }} />
       </div>
       <span className="text-xs tabular-nums text-slate-600 dark:text-slate-400">{p}%</span>
     </div>
