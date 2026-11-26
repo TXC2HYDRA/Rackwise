@@ -52,7 +52,7 @@ State machines: request `SUBMITTED → PLANNED → APPROVED → FULFILLED` (or `
 
 ## Frontend
 
-React 19, TypeScript, Vite, React Router, TanStack Query for server state, Tailwind v4 (class-based dark mode), Recharts. The JWT lives in memory only. Route guards and hidden buttons are convenience; the backend enforces every rule.
+React 19, TypeScript, Vite, React Router, TanStack Query for server state, Tailwind v4 (class-based dark mode); utilisation is shown with accessible meters and tables, no chart library. The JWT lives in memory only. Route guards and hidden buttons are convenience; the backend enforces every rule.
 
 ## Observability
 

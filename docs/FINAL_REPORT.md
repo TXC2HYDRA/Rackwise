@@ -7,7 +7,7 @@ Date: 2026-11-20. Repository: `TXC2HYDRA/Rackwise`. 24 pull requests merged to `
 Rackwise is an approval-gated capacity planning platform over simulated infrastructure.
 
 - **Backend (Java 21, Spring Boot 4.1, PostgreSQL, Flyway)**, ten modules: identity, inventory, capacity requests, planning, approval, execution, audit, planning assistant, external inventory sync (mock), observability.
-- **Frontend (React, TypeScript, Vite, Tailwind, TanStack Query, Recharts)**, ten screens (login, dashboard, inventory, new request, my requests, request detail, plan detail, approval queue and history, audit trail) plus an admin inventory page with the sync control. Light and dark mode.
+- **Frontend (React, TypeScript, Vite, Tailwind, TanStack Query)**, ten screens (login, dashboard, inventory, new request, my requests, request detail, plan detail, approval queue and history, audit trail) plus an admin inventory page with the sync control. Light and dark mode.
 - **Planning assistant**: deterministic local rules, optional Gemini wording behind strict validation, never in any decision path.
 - **Operations**: Docker Compose stack (Postgres, backend, nginx frontend, Prometheus, Grafana), JSON logs, custom metrics, scripts, GitHub Actions CI.
 - **Documentation**: README plus ARCHITECTURE, DATABASE, API, SECURITY, TESTING, DEPLOYMENT, DECISIONS, DEVELOPMENT_PLAN, AGENT_EVALUATION.
