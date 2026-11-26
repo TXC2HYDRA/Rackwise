@@ -98,7 +98,7 @@ Latest results (details and limits in [docs/TESTING.md](docs/TESTING.md)): backe
 - Placement is greedy, not an optimal packer. Inventory sync has an in-process lock (single backend instance only).
 - No OpenAPI/Swagger UI (see docs/API.md), no code coverage or dependency scanning, no load tests, only Chromium for browser tests, accessibility checked with automated axe only.
 - Live Gemini behaviour unverified.
-- Frontend has no role-administration screen (the API exists), and the bundle is about 780 kB (no code splitting).
+- Frontend has no role-administration screen (the API exists), and the JS bundle (about 353 kB, 107 kB gzipped) is not code-split.
 
 ## Repository workflow
 
