@@ -29,7 +29,7 @@ Status as of 2026-11-20. "Done" means implemented and exercised by the tests lis
 ## Planned / known gaps
 - Login rate limiting; refresh tokens and revocation; TLS.
 - OpenAPI/Swagger UI generation.
-- Code splitting of the frontend bundle (about 780 kB).
+- Code splitting of the frontend bundle (about 353 kB, 107 kB gzipped, after removing the chart library).
 - Dependency and image vulnerability scanning in CI; coverage reporting.
 - Load testing; mobile and cross-browser tests.
 - A production profile without dev users; multi-instance safe sync lock.
